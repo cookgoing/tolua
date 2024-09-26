@@ -37,12 +37,12 @@ public class ScriptsFromFile : MonoBehaviour
         if (GUI.Button(new Rect(50, 50, 120, 45), "DoFile"))
         {
             strLog = "";
-            lua.DoFile("ScriptsFromFile.lua");                        
+            lua.DoFile("ScriptsFromFile.lua");          // 和Require的区别：Require会缓存lua脚本道 package.loaded中，也就是说只会加载一次；但是 DoFile不会缓存，每调用一次，就会加载一次。              
         }
         else if (GUI.Button(new Rect(50, 150, 120, 45), "Require"))
         {
             strLog = "";            
-            lua.Require("ScriptsFromFile");            
+            lua.Require("ScriptsFromFile");      //这个require 就跟 lua中的require逻辑是一样的      
         }
 
         lua.Collect();

@@ -28,7 +28,7 @@ public class CallLuaFunction : MonoBehaviour
         new LuaResLoader();
         lua = new LuaState();
         lua.Start();
-        DelegateFactory.Init();        
+        DelegateFactory.Init();     // 不加这一句，后面的   ToDelegate<Func<int, int>>() 没有用。
         lua.DoString(script);
 
         //Get the function object

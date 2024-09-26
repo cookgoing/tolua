@@ -31,7 +31,7 @@ public class AccessingLuaVariables : MonoBehaviour
         new LuaResLoader();
         LuaState lua = new LuaState();
         lua.Start();
-        lua["Objs2Spawn"] = 5;
+        lua["Objs2Spawn"] = 5;// LuaState 有这样的语法：public object this[string fullPath]。在Global中增加变量
         lua.DoString(script);
 
         //通过LuaState访问
@@ -43,8 +43,8 @@ public class AccessingLuaVariables : MonoBehaviour
         func.Dispose();
 
         //cache成LuaTable进行访问
-        LuaTable table = lua.GetTable("varTable");
-        Debugger.Log("Read varTable from lua, default: {0} name: {1}", table["default"], table["map.name"]);
+        LuaTable table = lua.GetTable("varTable");//lua["varTable"] as LuaTable // 这个应该也可以
+        Debugger.Log("Read varTable from lua, default: {0} name: {1}", table["default"], table["map.name"]);//table["map.name"]没有这个变量，需得：((LuaTable)table["map"])["name"]
         table["map.name"] = "new";  //table 字符串只能是key
         Debugger.Log("Modify varTable name: {0}", table["map.name"]);
 
@@ -52,7 +52,7 @@ public class AccessingLuaVariables : MonoBehaviour
         LuaTable table1 = (LuaTable)table["newmap"];
         table1["name"] = "table1";
         Debugger.Log("varTable.newmap name: {0}", table1["name"]);
-        table1.Dispose();
+        table1.Dispose();// 即便 Dispose, 这个 newmap 还在内存中，还能被访问到
 
         table1 = table.GetMetaTable();
 
