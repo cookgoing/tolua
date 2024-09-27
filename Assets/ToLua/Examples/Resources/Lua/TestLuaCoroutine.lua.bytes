@@ -12,10 +12,10 @@ function CoFunc()
     print('Coroutine started')    
     for i = 0, 10, 1 do
         print(fib(i))                    
-        coroutine.wait(0.1)						
+        coroutine.wait(0.1)			-- 这里的coroutine并不是Lua自带的，而是 coroutine.lua这个脚本。；这里的wait应该等待 xx 秒	 	
     end	
 	print("current frameCount: "..Time.frameCount)
-	coroutine.step()
+	coroutine.step()				-- 这里 等待 1 帧
 	print("yield frameCount: "..Time.frameCount)
 
 	local www = UnityEngine.WWW("http://www.baidu.com")
@@ -26,7 +26,7 @@ function CoFunc()
 end
 
 function TestCortinue()	
-    coroutine.start(CoFunc)
+    coroutine.start(CoFunc)		-- 创建了 lua中的 coroutine，CoFunc 是被承载的函数
 end
 
 local coDelay = nil

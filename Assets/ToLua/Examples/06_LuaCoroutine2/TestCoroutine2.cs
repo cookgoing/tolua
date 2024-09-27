@@ -8,26 +8,26 @@ public class TestCoroutine2 : LuaClient
     string script =
     @"
         function CoExample()            
-            WaitForSeconds(1)
+            WaitForSeconds(1)			--在 LuaCoroutine.cs中定义，看名字，就知道是干什么的。
             print('WaitForSeconds end time: '.. UnityEngine.Time.time)            
             WaitForFixedUpdate()
             print('WaitForFixedUpdate end frameCount: '..UnityEngine.Time.frameCount)
             WaitForEndOfFrame()
             print('WaitForEndOfFrame end frameCount: '..UnityEngine.Time.frameCount)
             Yield(null)
-            print('yield null end frameCount: '..UnityEngine.Time.frameCount)
+            print('yield null end frameCount: '..UnityEngine.Time.frameCount) -- todo: 为什么 yield null 跟 waitForEndOfFrame在同一帧; 而且这个结果跟我自己测试还不一样。个人觉得可能是Lua和C#通信导致滞后。
             Yield(0)
             print('yield(0) end frameCime: '..UnityEngine.Time.frameCount)
             local www = UnityEngine.WWW('http://www.baidu.com')
             Yield(www)
             print('yield(www) end time: '.. UnityEngine.Time.time)
-            local s = tolua.tolstring(www.bytes)
+            local s = tolua.tolstring(www.bytes)  -- tolstring 定义在ToLua.cs 中
             print(s:sub(1, 128))
             print('coroutine over')
         end
 
         function TestCo()            
-            StartCoroutine(CoExample)                                   
+            StartCoroutine(CoExample)    -- 在 LuaCoroutine.cs中定义，也是启动一个 协程，跟 coroutine.start 一样                               
         end
 
         local coDelay = nil

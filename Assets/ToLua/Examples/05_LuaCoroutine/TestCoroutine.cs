@@ -71,7 +71,7 @@ public class TestCoroutine : MonoBehaviour
         }
         else if (GUI.Button(new Rect(50, 250, 120, 45), "GC"))
         {
-            lua.DoString("collectgarbage('collect')", "TestCoroutine.cs");
+            lua.DoString("collectgarbage('collect')", "TestCoroutine.cs"); // collectgarbage 是 Lua中的函数
             Resources.UnloadUnusedAssets();
         }
     }
