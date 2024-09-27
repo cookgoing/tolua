@@ -9,7 +9,7 @@ public class AccessingArray : MonoBehaviour
                 local len = array.Length
                 
                 for i = 0, len - 1 do
-                    print('Array: '..tostring(array[i]))
+                    print('Array: '..tostring(array[i])) -- 这个array 是C#中的数组，所以调用Lua函数的时候，是可以传递 userData相关的东西的。
                 end
 
                 local iter = array:GetEnumerator()
@@ -18,7 +18,7 @@ public class AccessingArray : MonoBehaviour
                     print('iter: '..iter.Current)
                 end
 
-                local t = array:ToTable()                
+                local t = array:ToTable()    -- 这个ToTable 是 ArrayWrap中注册的方法，不是Array中本来有的。tolua对这一块有处理            
                 
                 for i = 1, #t do
                     print('table: '.. tostring(t[i]))
@@ -46,7 +46,7 @@ public class AccessingArray : MonoBehaviour
 #else
         Application.RegisterLogCallback(ShowTips);
 #endif
-        new LuaResLoader();
+        // new LuaResLoader();
         lua = new LuaState();
         lua.Start();
         lua.DoString(script, "AccessingArray.cs");

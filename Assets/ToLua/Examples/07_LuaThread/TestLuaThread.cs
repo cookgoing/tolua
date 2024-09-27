@@ -54,7 +54,7 @@ public class TestLuaThread : MonoBehaviour
         LuaFunction func = state.GetFunction("Test");
         func.BeginPCall();
         func.PCall();
-        thread = func.CheckLuaThread();
+        thread = func.CheckLuaThread(); // 没有想到 连Lua的协程也有C#对应的类
         thread.name = "LuaThread";
         func.EndPCall();
         func.Dispose();
