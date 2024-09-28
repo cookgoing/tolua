@@ -17,11 +17,9 @@ public class TestCoroutine : MonoBehaviour
 #else
         Application.RegisterLogCallback(ShowTips);
 #endif        
-        new LuaResLoader();
         lua  = new LuaState();
         lua.Start();
-        LuaBinder.Bind(lua);
-        DelegateFactory.Init();         
+        LuaBinder.Bind(lua);       
         looper = gameObject.AddComponent<LuaLooper>();
         looper.luaState = lua;
 

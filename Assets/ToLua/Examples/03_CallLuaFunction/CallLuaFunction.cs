@@ -25,7 +25,6 @@ public class CallLuaFunction : MonoBehaviour
 #else
         Application.RegisterLogCallback(ShowTips);
 #endif
-        new LuaResLoader();
         lua = new LuaState();
         lua.Start();
         DelegateFactory.Init();     // 不加这一句，后面的   ToDelegate<Func<int, int>>() 没有用。

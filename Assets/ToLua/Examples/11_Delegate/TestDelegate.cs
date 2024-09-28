@@ -18,9 +18,10 @@ public class TestDelegate: MonoBehaviour
 
             function AddClick1(listener)       
                 if listener.onClick then
-                    listener.onClick = listener.onClick + DoClick1                                                    
+                    listener.onClick = listener.onClick + DoClick1          -- 在System_DelegateWrap中有重写 __add 和 __sub 操作，                                          
                 else
-                    listener.onClick = DoClick1                      
+					print('我不相信 listener.onClick == nil')			-- 好吧，是我肤浅了，C#中其实也可以 == null, 只不过 null 的时候，可以直接 += 来赋值事件。
+                    listener.onClick = DoClick1                       -- listener.onClick 的赋值操作在 TestEventListenerWrap中有定义：set_onClick
                 end                
             end
 
@@ -34,7 +35,7 @@ public class TestDelegate: MonoBehaviour
 
             function SetClick1(listener)
                 if listener.onClick then
-                    listener.onClick:Destroy()
+                    listener.onClick:Destroy()				-- 在System_DelegateWrap中有定义
                 end
 
                 listener.onClick = DoClick1         
@@ -58,7 +59,7 @@ public class TestDelegate: MonoBehaviour
 
             --测试重载问题
             function TestOverride(listener)
-                listener:SetOnFinished(TestEventListener.OnClick(DoClick1))
+                listener:SetOnFinished(TestEventListener.OnClick(DoClick1))  		--OnClick 函数，在 TestEventListenerWrap 中有定义
                 listener:SetOnFinished(TestEventListener.VoidDelegate(DoClick2))
             end
 
@@ -67,8 +68,15 @@ public class TestDelegate: MonoBehaviour
             end
 
             function AddEvent(listener)
-                listener.onClickEvent = listener.onClickEvent + TestEvent
-            end
+                listener.onClickEvent = listener.onClickEvent + TestEvent		
+				--[[
+					事件的注册和删除就值得好好说道说道了
+					1. 它不经过 Delegate的桥梁：System_DelegateWrap, 它的桥梁是 LuaInterface_EventObjectWrap
+					2. listener.onClickEvent + TestEvent 这个操作，首先，会调用 TestEventListenerWrap 中的 get_onClickEvent（把一个EventObject 推入栈中）；
+							然后，调用 LuaInterface_EventObjectWrap 中的 __add，把 TestEvent加入到之前栈中的 EventObject
+							最后，调用 TestEventListenerWrap 中的 set_onClickEvent，完成最终的事件注册
+				]]
+			end
 
             function RemoveEvent(listener)
                 listener.onClickEvent = listener.onClickEvent - TestEvent
@@ -82,7 +90,11 @@ public class TestDelegate: MonoBehaviour
 
             function AddSelfClick(listener)
                 if listener.onClick then
-                    listener.onClick = listener.onClick + TestEventListener.OnClick(t.TestSelffunc, t)
+                    listener.onClick = listener.onClick + TestEventListener.OnClick(t.TestSelffunc, t) 
+					--[[
+						注意，这个上面的 listener.onClick + DoClick1 不一样，DoClick1是一个Lua函数，但是 TestEventListener.OnClick(t.TestSelffunc, t)已经是一个C#的userData的了.
+							好在，System_DelegateWrap 中的 __add，对这两种都有操作。
+					]]
                 else
                     listener.onClick = TestEventListener.OnClick(t.TestSelffunc, t)
                 end   
@@ -119,7 +131,6 @@ public class TestDelegate: MonoBehaviour
 #else
         Application.RegisterLogCallback(ShowTips);
 #endif
-        new LuaResLoader();
         state = new LuaState();
         state.Start();
         LuaBinder.Bind(state);
@@ -255,7 +266,7 @@ public class TestDelegate: MonoBehaviour
         {
             tips = "";
             LuaFunction func = state.GetFunction("DoClick1");
-            listener.onClick = (TestEventListener.OnClick)DelegateFactory.RemoveDelegate(listener.onClick, func);
+            listener.onClick = (TestEventListener.OnClick)DelegateFactory.RemoveDelegate(listener.onClick, func); // 注意：移除委托不是跟增加一样，通过 -= 来完成，个人猜测是 DelegateTraits.Create是一个全新的委托。
             func.Dispose();
             func = null;
         }
