@@ -15,8 +15,12 @@ public class AccessingEnum : MonoBehaviour
                     print('enum ToInt() is ok')                
                 end
 
-                if not space:Equals(0) then
+                if not space:Equals(0) then				-- 这个 Equals 看来只能支持同类型的对象比较
                     print('enum compare int is ok')                
+                end
+
+				if space:Equals(e) then
+                    print('111 enum compare is ok')                
                 end
 
                 if space == e then
@@ -45,7 +49,6 @@ public class AccessingEnum : MonoBehaviour
 #else
         Application.RegisterLogCallback(ShowTips);
 #endif
-        new LuaResLoader();
         state = new LuaState();
         state.Start();
         LuaBinder.Bind(state);

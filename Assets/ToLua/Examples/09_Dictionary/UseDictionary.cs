@@ -30,7 +30,7 @@ public class UseDictionary : MonoBehaviour
                     print('id: '..v.id ..' name: '..v.name..' sex: '..v.sex)                                
                 end
 
-                local flag, account = map:TryGetValue(1, nil)
+                local flag, account = map:TryGetValue(1, nil) -- 因为 Lua中没有 out 语法， 所以TryGetValue这个语法都变了
 
                 if flag then
                     print('TryGetValue result ok: '..account.name)
@@ -70,14 +70,13 @@ public class UseDictionary : MonoBehaviour
 #else
         Application.RegisterLogCallback(ShowTips);
 #endif
-        new LuaResLoader();
         map.Add(1, new TestAccount(1, "水水", 0));
         map.Add(2, new TestAccount(2, "王伟", 1));
         map.Add(3, new TestAccount(3, "王芳", 0));
 
         LuaState luaState = new LuaState();
         luaState.Start();
-        BindMap(luaState);
+        BindMap(luaState); // 跟之前的AccessingArray很像，都是传递 userData到Lua中，Bind这里算是一个新的知识点。
 
         luaState.DoString(script, "UseDictionary.cs");
         LuaFunction func = luaState.GetFunction("TestDict");
