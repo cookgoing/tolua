@@ -8,7 +8,7 @@ public class TestCJson : LuaClient
     local json = require 'cjson'
 
     function Test(str)
-		print(str)
+		print(type(str))
 	    local data = json.decode(str)
         print(data.glossary.title)
 	    s = json.encode(data)
@@ -40,7 +40,7 @@ public class TestCJson : LuaClient
         luaState.DoString(script);
         LuaFunction func = luaState.GetFunction("Test");
         func.BeginPCall();
-        func.Push(str);
+        func.Push(str); 	// 跟数字一样，通过参数传递到lua端的 C#字符串 自动变成了 lua string
         func.PCall();
         func.EndPCall();
         func.Dispose();                        
