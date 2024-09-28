@@ -13,8 +13,8 @@ public class TestInt64 : MonoBehaviour
         @"            
             function TestInt64(x)                
                 x = 789 + x
-                assert(tostring(x) == '9223372036854775807')		                                       
-                local low, high = int64.tonum2(x)                
+                assert(tostring(x) == '9223372036854775807')		                                      
+                local low, high = int64.tonum2(x)                -- tolua_runtime/int64.c 中在global中，注册了 int64
                 print('x value is: '..tostring(x)..' low is: '.. low .. ' high is: '..high.. ' type is: '.. tolua.typename(x))           
                 local y = int64.new(1,2)                
                 local z = int64.new(1,2)
@@ -58,14 +58,13 @@ public class TestInt64 : MonoBehaviour
 #else
         Application.RegisterLogCallback(ShowTips);
 #endif        
-        new LuaResLoader();
         LuaState lua = new LuaState();
         lua.Start();
         lua.DoString(script, "TestInt64.cs");                
 
         LuaFunction func = lua.GetFunction("TestInt64");
         func.BeginPCall();
-        func.Push(9223372036854775807 - 789);
+        func.Push(9223372036854775807 - 789); // C#中的数值到Lua中，似乎就可以直接传递了，不用之前的 array, enum, dictionary那样，还需要一个桥梁
         func.PCall();
         long n64 = func.CheckLong();        
         Debugger.Log("int64 return from lua is: {0}", n64);
