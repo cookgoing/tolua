@@ -12,13 +12,13 @@ public class TestInherit : MonoBehaviour
         function LuaTransform.Extend(u)         
             local t = {}                        
             local _position = u.position      
-            tolua.setpeer(u, t)     
+            tolua.setpeer(u, t)     		-- tolua_runtime/tolua.c中有定义。 简单得说，t是u得一个环境; 设置完环境之后，貌似t的中变量，u也能直接访问了
 
             t.__index = t
-            local get = tolua.initget(t)
-            local set = tolua.initset(t)   
+            local get = tolua.initget(t)    -- tolua_runtime/tolua.c中有定义。 将一张空表设置成 t 得字段，字段key是 一个 lightUserdata: &gettag
+            local set = tolua.initset(t)   -- tolua_runtime/tolua.c中有定义。 跟 initget差不多，只不过 字段key 是 一个 &settag
 
-            local _base = u.base            
+            local _base = u.base            -- 这个 base 是 setpeer 的时候，表t中 添加的一个字段，它指向另外一张表。这张表有一个lightUserdata的字段<&vptr, u>
 
             --重写同名属性获取        
             get.position = function(self)                              
@@ -65,7 +65,7 @@ public class TestInherit : MonoBehaviour
 
             transform.xyz = 123
             transform.xyz = 456
-            print('extern field xyz is: '.. transform.xyz)
+            print('extern field xyz is: '.. transform.xyz) -- [C#]Transform中是没有 xyz变量，所以直接就在lua表中增加了
         end
         ";
 
@@ -78,7 +78,6 @@ public class TestInherit : MonoBehaviour
 #else
         Application.RegisterLogCallback(ShowTips);
 #endif   
-        new LuaResLoader();
         lua = new LuaState();        
         lua.Start();
         LuaBinder.Bind(lua);
