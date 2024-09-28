@@ -8,6 +8,7 @@ public class TestCJson : LuaClient
     local json = require 'cjson'
 
     function Test(str)
+		print(str)
 	    local data = json.decode(str)
         print(data.glossary.title)
 	    s = json.encode(data)

@@ -5,7 +5,7 @@ public class TestUTF8 : LuaClient
 {
     string script =
 @"
-    local utf8 = utf8
+    local utf8 = utf8 			-- tolua.lua中 require这个模块： misc.utf8
 
     function Test()        
 	    local l1 = utf8.len('你好')

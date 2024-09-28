@@ -125,7 +125,7 @@ public class TestABLoader : MonoBehaviour
         LuaState state = new LuaState();
         state.Start();
         state.DoString("print('hello tolua#:'..tostring(Vector3.zero))");
-        state.DoFile("Main.lua");
+        state.DoFile("Main.lua");  // 这里的Main.lua是AB中的文件了
         LuaFunction func = state.GetFunction("Main");
         func.Call();
         func.Dispose();
