@@ -15,8 +15,8 @@ ValueType[Bounds]		= 7
 ValueType[Touch]		= 8
 ValueType[LayerMask]	= 9
 ValueType[RaycastHit]	= 10
-ValueType[int64]		= 11
-ValueType[uint64]		= 12
+ValueType[int64]		= 11 -- tolua_runtime/int64.c 中在global中，注册了 int64
+ValueType[uint64]		= 12 -- 跟 int64一样
 
 local function GetValueType()	
 	local getmetatable = getmetatable

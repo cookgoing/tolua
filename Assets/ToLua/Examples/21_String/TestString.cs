@@ -20,6 +20,17 @@ public class TestString : LuaClient
         luastr = tolua.tolstring(str)
         print('lua string is: '..luastr)                    
     end
+
+	function TestString(strInCS)
+		local sInLua = 'a123'
+
+		print('strInCS: ', type(strInCS), 'sInLua: ', type(sInLua))
+		--[[
+			1. 从 C# 端 传递过来的 strInCS，会自动变成 lua的 string, 因为如果C#的string, 输出应该 userdata
+			2. 造成这个现象的原因，应该是 LuaState.cs 中，StackTraits<string>.Init 方法
+			3. 其他的类型，比如 AccessingEnum.cs 中的枚举，因为没有相关的 StackTraits，所以传递过去，还是C#中的枚举
+		]]
+	end
 ";
 
     protected override LuaFileUtils InitLoader()
@@ -43,6 +54,11 @@ public class TestString : LuaClient
         func.Call();
         func.Dispose();
         func = null;
+
+		LuaFunction func2 = luaState.GetFunction("TestString");
+        func2.Call("string in C#");
+        func2.Dispose();
+        func2 = null;
     }
 
     string tips;

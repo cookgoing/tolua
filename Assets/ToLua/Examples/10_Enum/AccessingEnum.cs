@@ -9,7 +9,7 @@ public class AccessingEnum : MonoBehaviour
             space = nil
 
             function TestEnum(e)        
-                print('Enum is:'..tostring(e))        
+                print('Enum is:'..tostring(e), 'type: ', type(e))        
 
                 if space:ToInt() == 0 then
                     print('enum ToInt() is ok')                

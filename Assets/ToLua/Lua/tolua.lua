@@ -17,7 +17,7 @@ if DebugServerIp then
 end
 
 require "misc.functions"
-Mathf		= require "UnityEngine.Mathf"
+Mathf		= require "UnityEngine.Mathf" -- 这里的UnityEngine. 全部都是Tolua自定义的 .lua 
 Vector3 	= require "UnityEngine.Vector3"
 Quaternion	= require "UnityEngine.Quaternion"
 Vector2		= require "UnityEngine.Vector2"
