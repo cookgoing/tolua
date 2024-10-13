@@ -9,42 +9,42 @@ public class TestReflection : LuaClient
 {
     string script =
 @"    
-    require 'tolua.reflection'          
-    tolua.loadassembly('Assembly-CSharp')        
-    local BindingFlags = require 'System.Reflection.BindingFlags'
+    require 'tolua.reflection'          -- LuaReflection 里面注册了这个模块
+    tolua.loadassembly('Assembly-CSharp')        -- LuaReflection 里面注册了这个方法
+    local BindingFlags = require 'System.Reflection.BindingFlags' -- BindingFlags.lua
 
     function DoClick()
         print('do click')        
     end 
 
     function Test()  
-        local t = typeof('TestExport')        
-        local func = tolua.getmethod(t, 'TestReflection')           
+        local t = typeof('TestExport')        -- ToLua.cs中有注册 tolua.typeof; 但是这里的typeof是typeof.lua中的方法。这个TestExport在TestOverload中有实现，并且它生成了Lua桥梁
+        local func = tolua.getmethod(t, 'TestReflection')       --  getmethod 也是  LuaReflection 注册的  
         func:Call()        
         func:Destroy()
         func = nil
         
         local objs = {Vector3.one, Vector3.zero}
-        local array = tolua.toarray(objs, typeof(Vector3))
-        local obj = tolua.createinstance(t, array)
-        --local constructor = tolua.getconstructor(t, typeof(Vector3):MakeArrayType())
+        local array = tolua.toarray(objs, typeof(Vector3)) -- toarray 是 Tolua.cs中注册的
+        local obj = tolua.createinstance(t, array) -- LuaReflection 注册的
+        --local constructor = tolua.getconstructor(t, typeof(Vector3):MakeArrayType()) -- 这个返回值 是 LuaConstructor 对应的Lua 桥梁
         --local obj = constructor:Call(array)        
         --constructor:Destroy()
 
-        func = tolua.getmethod(t, 'Test', typeof('System.Int32'):MakeByRefType())        
+        func = tolua.getmethod(t, 'Test', typeof('System.Int32'):MakeByRefType()) -- 这里的 typeof('System.Int32')，最终返回的是C#中的Tpye 所对应的Lua 桥梁。而后面的 MakeByRefType 表示的是，Test(out int i) 这个方法。tolua.getmethod 返回的是 LuaMethod 所表示的 lua 桥梁
         local r, o = func:Call(obj, 123)
         print(r..':'..o)
         func:Destroy()
 
-        local property = tolua.getproperty(t, 'Number')
-        local num = property:Get(obj, null)
+        local property = tolua.getproperty(t, 'Number') -- tolua.getproperty 返回的是 LuaProperty 所对应的 lua 桥梁
+        local num = property:Get(obj, null) -- LuaProperty 里面的 Get 方法，内部还是使用到了 PropertyInfo.GetValue; 这个方法里面有很多个重载，所以这里传入了一个null参数表示调用的是其中一个方法
         print('object Number: '..num)
-        property:Set(obj, 456, null)
+        property:Set(obj, 456, null) -- Set 方法 跟 Get 方法同理
         num = property:Get(obj, null)
         property:Destroy()
         print('object Number: '..num)
 
-        local field = tolua.getfield(t, 'field')
+        local field = tolua.getfield(t, 'field')  -- 这里的 getfiled 返回的是 LuaField 对应的 lua 桥梁
         num = field:Get(obj)
         print('object field: '.. num)
         field:Set(obj, 2048)
@@ -54,8 +54,8 @@ public class TestReflection : LuaClient
         
         field = tolua.getfield(t, 'OnClick')
         local onClick = field:Get(obj)        
-        onClick = onClick + DoClick        
-        field:Set(obj, onClick)        
+        onClick = onClick + DoClick        -- 这里一开始惊了我，onClick不是普通的变量，是一个委托，所以才有一个 + 的步骤。至于委托相关的东西，可以去看 TestDelegate.cs
+        field:Set(obj, onClick)        -- 这里很细节，已经做过实验，委托不像引用类型。比如有两个委托变量 a, b。 b = a; b += newAction, 这个新的事件只会添加到 b中，而不会添加到 a 中。
         local click = field:Get(obj)
         click:DynamicInvoke()
         field:Destroy()

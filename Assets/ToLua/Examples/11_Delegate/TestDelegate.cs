@@ -36,6 +36,12 @@ public class TestDelegate: MonoBehaviour
             function SetClick1(listener)
                 if listener.onClick then
                     listener.onClick:Destroy()				-- 在System_DelegateWrap中有定义
+					--[[
+						关于为什么会有 Destroy这个方法，需要说道说道了
+						1. lua 中的方法 转换成 C# 中的委托，是需要一个桥梁的，比如：TestEventListener_OnClick_Event(本质是 LuaDelegate)。只有转换成了C#中的方法之后，才能进行 委托的 +/-
+						2. C#中的委托也好，方法也罢，如果要被调用，就得依附类，或者对象，但是Lua中没有对象呀，换成C#中的委托的时候，要怎么依附呢？答案还是那个桥梁：TestEventListener_OnClick_Event，构建委托的时候，委托事件也相当于这个桥梁的一个静态变量
+						3. C#中一个对象没有用了，会被垃圾回收机制回收，其中的委托也会没有；但是 LuaDelegate 不一样，它里面还有 LuaFunction，LuaFunction是一个非托管对象，它需要被手动释放。这个 Destroy 里面就是在干这件事情
+					]]
                 end
 
                 listener.onClick = DoClick1         
@@ -177,6 +183,7 @@ public class TestDelegate: MonoBehaviour
     }
 
     //自动生成代码后拷贝过来
+	// 这个 TestEventListener_OnClick_Event 是为了 Lua中的方法到 C#中，能有一个映射关系，你可以理解它就是一个桥梁 。方便 Delegate 的一些操作，比如 +, - 等。
     class TestEventListener_OnClick_Event : LuaDelegate
     {
         public TestEventListener_OnClick_Event(LuaFunction func) : base(func) { }
