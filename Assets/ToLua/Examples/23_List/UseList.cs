@@ -34,6 +34,10 @@ public class UseList : LuaClient
                 end
             end
 
+			--[[
+				1. 这里的list, list1 都是C#中的List<> 所对应的Lua userdata. 桥梁是 System_Collections_Generic_ListWrap
+				2. Tolua/BaseType 中有很多桥梁，这些桥梁不是生成的，而是Tolua事先实现好的
+			]]
             function Test(list, list1)        
                 list:Add(123)
                 print('Add result: list[0] is '..list[0])
@@ -77,7 +81,7 @@ public class UseList : LuaClient
                 end
 
                 --注意推导后的委托声明必须注册, 这里是System.Predicate<int>
-                local index = list:FindIndex(System.Predicate_int(Exist2))
+                local index = list:FindIndex(System.Predicate_int(Exist2)) -- Predicate<int> 在 CustomSetting中被配置，然后在 LuaBinder中 被注册
 
                 if index == 2 then
                     print('FindIndex is ok')
@@ -120,7 +124,7 @@ public class UseList : LuaClient
                 end
 
                 list:Insert(0, 123)
-                list:ForEach(function(v) print('foreach: '..v) end)
+                list:ForEach(function(v) print('foreach: '..v) end) -- 这里有细节；1.Tolua通过桥梁把这个 lua 函数 转换成 C#中的Action<int> 委托事件。2. 然后才会通过桥梁调用 ForEach
                 local count = list.Count      
 
                 list:Sort(System.Comparison_int(Compare))
@@ -128,6 +132,12 @@ public class UseList : LuaClient
                                 
                 for i = 0, count - 1 do
                     print('for:'..list[i])
+					--[[
+						list[i] 这个东西很意思，其实 System_Collections_Generic_ListWrap 并没有实现 [i] 的方法，只有一个 .geti 貌似有关系
+						那么这个[i] 是怎么跟 .geti 联系上的呢？
+						在tolua.c，会为每一个C# 到Lua转成的 userdata，注册方法：['__index'] = class_index_event
+						这个 class_index_event 会判断当前是一个userdata, 并且想到调用一个数字的字段，那么就会就 .geti 字段。一切也就顺理成章了
+					]]
                 end
 
                 list:Clear()
